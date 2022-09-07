@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  nginx:
+    container_name: nginx-test
+    build:
+      context: .
+      dockerfile: ./docker_settings/nginx/Dockerfile
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "8000:80"
+      - "443:443"
+    networks:
+      - default
+
+  backend:
+    container_name: backend-test
+    build:
+      context: .
+    working_dir: /var/www/backend
+    env_file: .env
+    restart: always
+    tty: true
+    expose:
+      - "9000"

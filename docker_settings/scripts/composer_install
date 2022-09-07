@@ -1,0 +1,4 @@
+#!/bin/bash
+
+winpty docker exec -it backend composer install --no-interaction --no-plugins --no-scripts --no-dev --prefer-dist
+winpty docker exec -it backend composer dump-autoload

@@ -1,0 +1,67 @@
+version: "3.9"
+services:
+  redis:
+    container_name: redis-test
+    image: redis:6.0-alpine
+    expose:
+      - "6379"
+
+  db:
+    container_name: db-test
+    image: postgres:${POSTGRES_VERSION:-11.4}-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pg-data:/var/lib/postgresql-test/data:rw
+    env_file: 
+      - ./.env
+    tty: true
+
+  nginx:
+    image: nginx:alpine
+    environment:
+      VIRTUAL_HOST: testing.local
+    restart: "no"
+    volumes:
+      - ./docker_settings/nginx/modern.d/:/etc/nginx/conf.d:ro
+      - .:/var/www/backend:cached
+
+  backend:
+    build:
+      target: dev
+    restart: "no"
+    depends_on:
+      - composer
+      - redis
+      - db
+    volumes:
+      - .:/var/www/backend:cached
+      # - ./docker/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+
+  # node:
+  #   image: node:12-alpine
+  #   working_dir: /app
+  #   volumes:
+  #     - ./:/app
+  #   command: sh -c "npm install && npm run watch"
+
+  composer:
+    container_name: composer-test
+    image: composer:1.10
+    working_dir: /var/www/backend
+    # environment:
+      # SSH_AUTH_SOCK: /ssh-auth.sock
+    volumes:
+      - .:/var/www/backend:cached
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      # - "$SSH_AUTH_SOCK:/ssh-auth.sock"
+    # command: composer install --ignore-platform-reqs --no-scripts
+    command: composer install --ignore-platform-reqs
+
+volumes:
+  pg-data:

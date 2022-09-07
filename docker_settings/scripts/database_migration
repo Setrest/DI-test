@@ -1,0 +1,4 @@
+#!/bin/bash
+
+winpty docker exec -it backend php artisan migrate
+winpty docker exec -it backend php artisan db:seed
