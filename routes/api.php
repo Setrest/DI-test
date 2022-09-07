@@ -20,5 +20,5 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::prefix('/')->middleware('auth')->group(RouteHelper::routes('records'));
+Route::prefix('/')->group(RouteHelper::routes('records'));
 Route::post('auth', [AuthController::class, 'authByEmail']);
